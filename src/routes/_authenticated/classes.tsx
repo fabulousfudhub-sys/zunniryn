@@ -40,9 +40,10 @@ function ClassesPage() {
   return (
     <div className="space-y-6 p-6 lg:p-8">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Classes & Arms</h1>
-        <p className="text-sm text-muted-foreground">Manage academic classes (grouped by section) and class arms / streams.</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-primary">Classes &amp; Arms Management</h1>
+        <p className="text-sm text-muted-foreground">Configure academic levels, class structures, and class arms / streams.</p>
       </header>
+
 
       <Tabs defaultValue="classes" className="space-y-4">
         <TabsList>
@@ -119,6 +120,13 @@ function ClassesPage() {
         </TabsContent>
       </Tabs>
 
+      <div className="grid gap-4 sm:grid-cols-3">
+        <FooterStat label="Total Classes" value={ref.classes.length} />
+        <FooterStat label="Total Arms" value={ref.arms.length} />
+        <FooterStat label="Sections" value={SECTIONS.length} />
+      </div>
+
+
       <Dialog open={!!editCls} onOpenChange={(o) => !o && setEditCls(null)}>
         {editCls && <ClassDialog cls={editCls} onClose={() => setEditCls(null)} />}
       </Dialog>
@@ -128,6 +136,16 @@ function ClassesPage() {
     </div>
   );
 }
+
+function FooterStat({ label, value }: { label: string; value: number }) {
+  return (
+    <Card className="flex items-center justify-between p-4">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="font-display text-2xl font-semibold text-primary">{value.toLocaleString()}</span>
+    </Card>
+  );
+}
+
 
 function ClassDialog({ cls, onClose }: { cls?: ClassRef; onClose: () => void }) {
   const qc = useQueryClient();

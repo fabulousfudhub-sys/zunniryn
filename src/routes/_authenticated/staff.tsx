@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Download, Users } from "lucide-react";
 import { DataPagination, useClientPage } from "@/components/data-pagination";
 
 const staffQO = queryOptions({ queryKey: ["staff"], queryFn: () => listStaff() });
@@ -56,87 +56,167 @@ function StaffPage() {
     return matchQ && matchRole && matchStatus;
   }), [staff, q, roleFilter, statusFilter]);
 
-  const { pageRows, total, totalPages, safePage } = useClientPage(filtered, page, pageSize);
+  const activeCount = useMemo(() => staff.filter((s) => s.is_active).length, [staff]);
+  const departments = useMemo(
+    () => Array.from(new Set(staff.map((s) => s.department).filter(Boolean))) as string[],
+    [staff],
+  );
+  const [deptFilter, setDeptFilter] = useState<"all" | string>("all");
+
+  const filtered2 = useMemo(
+    () => filtered.filter((s) => deptFilter === "all" || s.department === deptFilter),
+    [filtered, deptFilter],
+  );
+  const { pageRows, total, totalPages, safePage } = useClientPage(filtered2, page, pageSize);
+
+  const exportCsv = () => {
+    const head = ["Employee No", "Name", "Email", "Department", "Designation", "Status"];
+    const rows = filtered2.map((s) => [
+      s.employee_no, s.full_name, s.email ?? "", s.department ?? "",
+      s.roles.map(prettyRole).join(" / "), s.is_active ? "Active" : "Inactive",
+    ]);
+    const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = "staff-directory.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight">Staff</h1>
-          <p className="text-sm text-muted-foreground">Manage teaching and administrative staff. Login credentials are created automatically.</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-primary">Staff Directory</h1>
+          <p className="text-sm text-muted-foreground">Manage academic and non-academic personnel records. Login credentials are created automatically.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" /> Add staff</Button>
-          </DialogTrigger>
-          <AddStaffDialog onSuccess={() => setOpen(false)} />
-        </Dialog>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={exportCsv}><Download className="mr-2 h-4 w-4" /> Export CSV</Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="mr-2 h-4 w-4" /> Register New Staff</Button>
+            </DialogTrigger>
+            <AddStaffDialog onSuccess={() => setOpen(false)} />
+          </Dialog>
+        </div>
       </header>
 
-      <Card className="p-4 space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative max-w-sm flex-1 min-w-[220px]">
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        {/* Sidebar */}
+        <div className="space-y-4">
+          <Card className="p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active Staff</span>
+              <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">{activeCount} of {staff.length}</Badge>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <Users className="h-7 w-7 text-primary" />
+              <span className="font-display text-3xl font-semibold text-primary">{activeCount}</span>
+            </div>
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full bg-primary" style={{ width: `${staff.length ? (activeCount / staff.length) * 100 : 0}%` }} />
+            </div>
+          </Card>
+
+          <Card className="p-4 space-y-4">
+            <h2 className="text-sm font-semibold text-primary">Quick Filter</h2>
+            <div>
+              <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">Department</Label>
+              <Select value={deptFilter} onValueChange={(v) => { setDeptFilter(v); setPage(1); }}>
+                <SelectTrigger><SelectValue placeholder="All Departments" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">Status</Label>
+              <div className="flex flex-wrap gap-2">
+                {(["all", "active", "inactive"] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => { setStatusFilter(s); setPage(1); }}
+                    className={`px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+                      statusFilter === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+                    }`}
+                  >
+                    {s === "all" ? "All" : s}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">Role</Label>
+              <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v as any); setPage(1); }}>
+                <SelectTrigger><SelectValue placeholder="All roles" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All roles</SelectItem>
+                  {ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </Card>
+        </div>
+
+        {/* Table */}
+        <Card className="p-4 space-y-4">
+          <div className="relative max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-8" placeholder="Search name, email or employee no" value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
+            <Input className="pl-8" placeholder="Search staff, documents, or ID…" value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
           </div>
-          <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v as any); setPage(1); }}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="All roles" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All roles</SelectItem>
-              {ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as any); setPage(1); }}>
-            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="rounded-md border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employee No</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pageRows.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-10">No staff match.</TableCell></TableRow>
-              )}
-              {pageRows.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell className="font-mono text-xs">{s.employee_no}</TableCell>
-                  <TableCell className="font-medium">{s.full_name}</TableCell>
-                  <TableCell>{s.email ?? "—"}</TableCell>
-                  <TableCell>{s.department ?? "—"}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {s.roles.length === 0 ? <span className="text-xs text-muted-foreground">—</span>
-                        : s.roles.map((r) => <Badge key={r} variant="secondary" className="text-[10px]">{prettyRole(r)}</Badge>)}
-                    </div>
-                  </TableCell>
-                  <TableCell><Badge variant={s.is_active ? "default" : "secondary"}>{s.is_active ? "Active" : "Inactive"}</Badge></TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => setEditing(s)} aria-label="Edit">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Staff Name</TableHead>
+                  <TableHead>ID Number</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Designation</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <DataPagination page={safePage} setPage={setPage} pageSize={pageSize} setPageSize={setPageSize} total={total} totalPages={totalPages} />
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {pageRows.length === 0 && (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-10">No staff match.</TableCell></TableRow>
+                )}
+                {pageRows.map((s) => {
+                  const initials = s.full_name.split(" ").map((p) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials}</div>
+                          <div className="min-w-0">
+                            <div className="font-medium leading-tight">{s.full_name}</div>
+                            <div className="truncate text-xs text-muted-foreground">{s.email ?? "—"}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{s.employee_no}</TableCell>
+                      <TableCell>{s.department ?? "—"}</TableCell>
+                      <TableCell>{s.roles.length ? prettyRole(s.roles[0]) : "—"}</TableCell>
+                      <TableCell>
+                        <Badge className={s.is_active
+                          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                          : "bg-muted text-muted-foreground hover:bg-muted"}>
+                          {s.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => setEditing(s)} aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+          <DataPagination page={safePage} setPage={setPage} pageSize={pageSize} setPageSize={setPageSize} total={total} totalPages={totalPages} />
+        </Card>
+      </div>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         {editing && <EditStaffDialog staff={editing} onClose={() => setEditing(null)} />}

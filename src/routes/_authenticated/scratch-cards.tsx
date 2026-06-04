@@ -30,11 +30,21 @@ export const Route = createFileRoute("/_authenticated/scratch-cards")({
 
 function ScratchCardsPage() {
   const { data: ref } = useSuspenseQuery(refQO);
-  void useSuspenseQuery(listQO); // ensure prefetched
+  const { data: list } = useSuspenseQuery(listQO);
   const qc = useQueryClient();
   const [count, setCount] = useState(20);
   const [maxUses, setMaxUses] = useState(3);
   const [sessionId, setSessionId] = useState(ref.currentSession?.id ?? "");
+
+  const stats = useMemo(() => {
+    const cards = list.cards;
+    return {
+      total: cards.length,
+      sold: cards.filter((c) => c.uses > 0).length,
+      active: cards.filter((c) => c.status === "unused").length,
+      expired: cards.filter((c) => c.status === "expired").length,
+    };
+  }, [list.cards]);
 
   const gen = useServerFn(generateScratchCards);
   const mutate = useMutation({
@@ -44,11 +54,19 @@ function ScratchCardsPage() {
   });
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 lg:p-8">
       <div>
-        <h1 className="font-display text-3xl font-bold">Scratch Cards</h1>
-        <p className="text-sm text-muted-foreground">Generate PINs for parents to access published results.</p>
+        <h1 className="font-display text-3xl font-semibold text-primary">Scratch Card Management</h1>
+        <p className="text-sm text-muted-foreground">Generate, track, and manage result-checker PINs for the current academic session.</p>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile label="Total Generated" value={stats.total} accent />
+        <StatTile label="Total Sold" value={stats.sold} tone="emerald" />
+        <StatTile label="Active PINs" value={stats.active} tone="primary" />
+        <StatTile label="Expired Cards" value={stats.expired} tone="destructive" />
+      </div>
+
 
       <Card className="p-4">
         <div className="grid gap-4 md:grid-cols-4">
@@ -82,6 +100,19 @@ function ScratchCardsPage() {
     </div>
   );
 }
+
+function StatTile({ label, value, accent, tone }: { label: string; value: number; accent?: boolean; tone?: "emerald" | "primary" | "destructive" }) {
+  const toneClass = tone === "emerald" ? "text-emerald-600"
+    : tone === "destructive" ? "text-destructive"
+    : tone === "primary" ? "text-primary" : "text-primary";
+  return (
+    <Card className={`p-5 ${accent ? "border-l-[3px] border-l-primary" : ""}`}>
+      <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+      <div className={`mt-2 font-display text-3xl font-bold ${toneClass}`}>{value.toLocaleString()}</div>
+    </Card>
+  );
+}
+
 
 function CardsTable() {
   const { data: list } = useSuspenseQuery(listQO);
