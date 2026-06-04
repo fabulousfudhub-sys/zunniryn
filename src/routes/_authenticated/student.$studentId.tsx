@@ -30,7 +30,7 @@ function age(dob: string | null) {
 function DossierPage() {
   const { studentId } = Route.useParams();
   const { data: s } = useSuspenseQuery(studentQO(studentId));
-  const initials = s.full_name.split(" ").map((x) => x[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+  const initials = s.full_name.split(" ").map((x: string) => x[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
   const a = age(s.date_of_birth);
 
   const docs = [
