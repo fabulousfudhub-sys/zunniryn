@@ -42,7 +42,7 @@ function DashboardPage() {
   const total = sect.NUR + sect.PRI + sect.SEC || stats.students || 1;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">
       {/* Top stat strip */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="Total Students" value={stats.students.toLocaleString()} hint="+12% from last term" icon={Users} accent />
