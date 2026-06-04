@@ -51,6 +51,7 @@ const GROUPS: NavGroup[] = [
       { to: "/classes", label: "Classes & Arms", icon: BookOpen, roles: ["super_admin","principal","vice_principal"] },
       { to: "/subjects", label: "Subjects", icon: ScrollText, roles: ["super_admin","principal","vice_principal"] },
       { to: "/assignments", label: "Teacher Assignments", icon: GraduationCap, roles: ["super_admin","principal","vice_principal"] },
+      { to: "/calendar", label: "Calendar", icon: Calendar },
       { to: "/attendance", label: "Attendance", icon: Calendar, roles: ["super_admin","principal","form_master","teacher"] },
     ],
   },
