@@ -137,6 +137,16 @@ function ClassesPage() {
   );
 }
 
+function FooterStat({ label, value }: { label: string; value: number }) {
+  return (
+    <Card className="flex items-center justify-between p-4">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="font-display text-2xl font-semibold text-primary">{value.toLocaleString()}</span>
+    </Card>
+  );
+}
+
+
 function ClassDialog({ cls, onClose }: { cls?: ClassRef; onClose: () => void }) {
   const qc = useQueryClient();
   const createFn = useServerFn(createClass);
