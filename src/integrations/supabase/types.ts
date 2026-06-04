@@ -569,6 +569,7 @@ export type Database = {
       }
       scratch_cards: {
         Row: {
+          assigned_student_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -581,6 +582,7 @@ export type Database = {
           uses: number
         }
         Insert: {
+          assigned_student_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -593,6 +595,7 @@ export type Database = {
           uses?: number
         }
         Update: {
+          assigned_student_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -605,6 +608,13 @@ export type Database = {
           uses?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "scratch_cards_assigned_student_id_fkey"
+            columns: ["assigned_student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "scratch_cards_session_id_fkey"
             columns: ["session_id"]
