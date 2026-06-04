@@ -120,6 +120,13 @@ function ClassesPage() {
         </TabsContent>
       </Tabs>
 
+      <div className="grid gap-4 sm:grid-cols-3">
+        <FooterStat label="Total Classes" value={ref.classes.length} />
+        <FooterStat label="Total Arms" value={ref.arms.length} />
+        <FooterStat label="Sections" value={SECTIONS.length} />
+      </div>
+
+
       <Dialog open={!!editCls} onOpenChange={(o) => !o && setEditCls(null)}>
         {editCls && <ClassDialog cls={editCls} onClose={() => setEditCls(null)} />}
       </Dialog>
