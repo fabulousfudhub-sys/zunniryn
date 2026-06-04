@@ -150,3 +150,74 @@ export const bulkUpdateStudents = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { updated: count ?? ids.length };
   });
+
+export const getStudent = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: s, error } = await supabase
+      .from("students")
+      .select(
+        "id,admission_no,full_name,gender,date_of_birth,state_of_origin,lga,address,parent_name,parent_phone,parent_email,parent_occupation,passport_url,status,admission_date,current_class_id,current_arm_id,classes:current_class_id(name,section),arms:current_arm_id(name),academic_sessions:admission_session_id(name)",
+      )
+      .eq("id", data.id)
+      .single();
+    if (error || !s) throw new Error(error?.message ?? "Student not found");
+    const stu = s as any;
+
+    // Promotion / result history
+    const { data: sheets } = await supabase
+      .from("result_sheets")
+      .select("id,average,position,status,promoted,total_score,total_obtainable,terms:term_id(name),academic_sessions:session_id(name),classes:class_id(name)")
+      .eq("student_id", data.id)
+      .order("created_at", { ascending: false })
+      .limit(12);
+
+    // Linked siblings: share a parent phone, exclude self
+    let siblings: { id: string; full_name: string; admission_no: string; class_name: string | null }[] = [];
+    if (stu.parent_phone) {
+      const { data: sib } = await supabase
+        .from("students")
+        .select("id,full_name,admission_no,classes:current_class_id(name)")
+        .eq("parent_phone", stu.parent_phone)
+        .neq("id", data.id)
+        .limit(8);
+      siblings = (sib ?? []).map((x: any) => ({
+        id: x.id, full_name: x.full_name, admission_no: x.admission_no, class_name: x.classes?.name ?? null,
+      }));
+    }
+
+    return {
+      id: stu.id,
+      admission_no: stu.admission_no,
+      full_name: stu.full_name,
+      gender: stu.gender as string | null,
+      date_of_birth: stu.date_of_birth as string | null,
+      state_of_origin: stu.state_of_origin as string | null,
+      lga: stu.lga as string | null,
+      address: stu.address as string | null,
+      parent_name: stu.parent_name as string | null,
+      parent_phone: stu.parent_phone as string | null,
+      parent_email: stu.parent_email as string | null,
+      parent_occupation: stu.parent_occupation as string | null,
+      passport_url: stu.passport_url as string | null,
+      status: stu.status as StudentStatus,
+      admission_date: stu.admission_date as string,
+      class_name: stu.classes?.name ?? null,
+      section: stu.classes?.section ?? null,
+      arm_name: stu.arms?.name ?? null,
+      session_name: stu.academic_sessions?.name ?? null,
+      history: (sheets ?? []).map((r: any) => ({
+        id: r.id,
+        session_name: r.academic_sessions?.name ?? "—",
+        term_name: r.terms?.name ?? "—",
+        class_name: r.classes?.name ?? "—",
+        average: Number(r.average ?? 0),
+        position: r.position as number | null,
+        status: r.status as string,
+        promoted: !!r.promoted,
+      })),
+      siblings,
+    };
+  });

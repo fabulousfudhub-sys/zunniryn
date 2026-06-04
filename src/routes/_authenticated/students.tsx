@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -213,7 +213,7 @@ function StudentsPage() {
                 <TableRow key={s.id} data-state={selected.has(s.id) ? "selected" : undefined}>
                   <TableCell><Checkbox checked={selected.has(s.id)} onCheckedChange={() => toggleOne(s.id)} aria-label="Select row" /></TableCell>
                   <TableCell className="font-mono text-xs">{s.admission_no}</TableCell>
-                  <TableCell className="font-medium">{s.full_name}</TableCell>
+                  <TableCell className="font-medium"><Link to="/student/$studentId" params={{ studentId: s.id }} className="hover:text-primary hover:underline">{s.full_name}</Link></TableCell>
                   <TableCell>{s.class_name ?? "—"}</TableCell>
                   <TableCell>{s.arm_name ?? "—"}</TableCell>
                   <TableCell className="hidden sm:table-cell">{s.gender ?? "—"}</TableCell>
