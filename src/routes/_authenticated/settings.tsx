@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -7,12 +7,15 @@ import { getMe } from "@/lib/me.functions";
 import { setCurrentSession, setCurrentTerm, listTerms } from "@/lib/academic.functions";
 import { getReferenceData } from "@/lib/reference.functions";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Upload, X, Check } from "lucide-react";
+import {
+  Loader2, Upload, X, Save, CalendarDays, ShieldCheck, History,
+  CheckCircle2, Activity, CloudUpload,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/settings")({ component: Page });
@@ -62,82 +65,111 @@ function Page() {
   const set = (k: string, v: any) => setForm({ ...form, [k]: v });
 
   return (
-    <div className="container mx-auto max-w-3xl p-6">
-      <h1 className="font-display text-3xl font-bold text-primary">School Settings</h1>
-      <p className="text-sm text-muted-foreground">Configure school identity and defaults. {!isSuper && <span className="text-destructive">(read-only)</span>}</p>
+    <div className="p-6 lg:p-8 space-y-6">
+      <header>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Global School Settings</p>
+        <h1 className="font-display text-3xl font-semibold text-primary">Institutional Hub</h1>
+        <p className="text-sm text-muted-foreground">
+          Manage the foundational identity and academic parameters of {form.school_name}.
+          {!isSuper && <span className="ml-1 text-destructive">(read-only)</span>}
+        </p>
+      </header>
 
-      <form onSubmit={submit} className="mt-6 space-y-4">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Identity</CardTitle></CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            <Row label="School name"><Input value={form.school_name} onChange={(e) => set("school_name", e.target.value)} disabled={!isSuper} /></Row>
-            <Row label="Acronym"><Input value={form.acronym} onChange={(e) => set("acronym", e.target.value)} disabled={!isSuper} /></Row>
-            <Row label="Location"><Input value={form.location} onChange={(e) => set("location", e.target.value)} disabled={!isSuper} /></Row>
-            <Row label="Motto"><Input value={form.motto ?? ""} onChange={(e) => set("motto", e.target.value)} disabled={!isSuper} /></Row>
-
-            <Row label="School logo" className="md:col-span-2">
-              <div className="flex items-center gap-4">
-                <div className="flex h-20 w-20 items-center justify-center rounded-md border bg-muted/30 overflow-hidden">
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Identity card */}
+        <Card className="lg:col-span-2">
+          <CardContent className="p-6">
+            <form onSubmit={submit} className="grid gap-6 sm:grid-cols-[auto_1fr]">
+              {/* Logo */}
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => isSuper && fileRef.current?.click()}
+                  className="flex h-32 w-32 flex-col items-center justify-center gap-1 border-2 border-dashed bg-muted/30 text-muted-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60 overflow-hidden"
+                  disabled={!isSuper}
+                >
                   {form.logo_url
-                    ? <img src={form.logo_url} alt="Logo" className="h-full w-full object-contain" />
-                    : <span className="text-xs text-muted-foreground">No logo</span>}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) onLogoFile(f); e.target.value = ""; }}
-                    disabled={!isSuper}
-                  />
-                  <div className="flex gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={!isSuper}>
-                      <Upload className="mr-2 h-4 w-4" /> Upload image
-                    </Button>
-                    {form.logo_url && (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => set("logo_url", null)} disabled={!isSuper}>
-                        <X className="mr-2 h-4 w-4" /> Remove
-                      </Button>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">PNG or JPG, under 1MB. Embedded directly — no link needed.</p>
-                </div>
+                    ? <img src={form.logo_url} alt="School logo" className="h-full w-full object-contain" />
+                    : <><Upload className="h-6 w-6" /><span className="text-[11px] font-medium uppercase tracking-wide">Update Logo</span></>}
+                </button>
+                {form.logo_url && isSuper && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => set("logo_url", null)}>
+                    <X className="mr-1 h-3.5 w-3.5" /> Remove
+                  </Button>
+                )}
+                <p className="max-w-[8rem] text-center text-[11px] text-muted-foreground">PNG or JPG recommended. Max 1MB.</p>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) onLogoFile(f); e.target.value = ""; }} disabled={!isSuper} />
               </div>
-            </Row>
+
+              {/* Fields */}
+              <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Row label="School Name"><Input value={form.school_name} onChange={(e) => set("school_name", e.target.value)} disabled={!isSuper} /></Row>
+                  <Row label="Acronym"><Input value={form.acronym} onChange={(e) => set("acronym", e.target.value)} disabled={!isSuper} /></Row>
+                </div>
+                <Row label="Physical Address">
+                  <Textarea value={form.address ?? ""} onChange={(e) => set("address", e.target.value)} disabled={!isSuper} rows={2} />
+                </Row>
+                <Row label="Motto"><Input value={form.motto ?? ""} onChange={(e) => set("motto", e.target.value)} disabled={!isSuper} /></Row>
+                {isSuper && (
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground">
+                      {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />} Save Changes
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Academic period */}
+        <AcademicPeriodCard isSuper={!!isSuper} />
+      </div>
+
+      {/* Contact + defaults */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardContent className="space-y-4 p-6">
+            <h2 className="font-display text-lg font-semibold text-primary">Contact</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Row label="Principal name"><Input value={form.principal_name ?? ""} onChange={(e) => set("principal_name", e.target.value)} disabled={!isSuper} /></Row>
+              <Row label="Location"><Input value={form.location} onChange={(e) => set("location", e.target.value)} disabled={!isSuper} /></Row>
+              <Row label="Contact email"><Input type="email" value={form.contact_email ?? ""} onChange={(e) => set("contact_email", e.target.value)} disabled={!isSuper} /></Row>
+              <Row label="Contact phone"><Input value={form.contact_phone ?? ""} onChange={(e) => set("contact_phone", e.target.value)} disabled={!isSuper} /></Row>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-base">Contact</CardTitle></CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            <Row label="Principal name"><Input value={form.principal_name ?? ""} onChange={(e) => set("principal_name", e.target.value)} disabled={!isSuper} /></Row>
-            <Row label="Contact email"><Input type="email" value={form.contact_email ?? ""} onChange={(e) => set("contact_email", e.target.value)} disabled={!isSuper} /></Row>
-            <Row label="Contact phone"><Input value={form.contact_phone ?? ""} onChange={(e) => set("contact_phone", e.target.value)} disabled={!isSuper} /></Row>
-            <Row label="Address" className="md:col-span-2"><Textarea value={form.address ?? ""} onChange={(e) => set("address", e.target.value)} disabled={!isSuper} rows={2} /></Row>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-base">Defaults</CardTitle></CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4 p-6">
+            <h2 className="font-display text-lg font-semibold text-primary">Defaults</h2>
             <Row label="Scratch-card default uses">
               <Input type="number" min={1} max={50} value={form.scratch_card_default_uses}
                 onChange={(e) => set("scratch_card_default_uses", e.target.value)} disabled={!isSuper} />
             </Row>
+            <p className="text-xs text-muted-foreground">Number of times a single result-checker PIN can be used before it is exhausted.</p>
           </CardContent>
         </Card>
-        {isSuper && (
-          <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground">
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save Settings
-          </Button>
-        )}
-      </form>
+      </div>
 
-      {isSuper && <CurrentSessionTermCard />}
+      {/* Status tiles */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatusTile icon={<CheckCircle2 className="h-5 w-5" />} label="System Status" value="Configured" />
+        <StatusTile icon={<ShieldCheck className="h-5 w-5" />} label="Records" value="Secured" />
+        <StatusTile icon={<Activity className="h-5 w-5" />} label="Audit Logs" value="Active" />
+        <Button asChild variant="secondary" className="h-auto justify-start gap-3 p-4">
+          <Link to="/exports">
+            <CloudUpload className="h-5 w-5 text-primary" />
+            <span className="font-medium">Exports &amp; Backup</span>
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }
 
-function CurrentSessionTermCard() {
+function AcademicPeriodCard({ isSuper }: { isSuper: boolean }) {
   const qc = useQueryClient();
   const refFn = useServerFn(getReferenceData);
   const termsFn = useServerFn(listTerms);
@@ -153,63 +185,89 @@ function CurrentSessionTermCard() {
   const sessionTerms = allTerms.filter((t) => t.session_id === current?.id);
   const currentTerm = sessionTerms.find((t) => t.is_current) ?? null;
 
-  const [selSession, setSelSession] = useState<string>("");
-  const [selTerm, setSelTerm] = useState<string>("");
-  useEffect(() => { if (current && !selSession) setSelSession(current.id); }, [current, selSession]);
-  useEffect(() => { if (currentTerm && !selTerm) setSelTerm(currentTerm.id); }, [currentTerm, selTerm]);
-
-  const applySession = async () => {
-    if (!selSession || selSession === current?.id) return;
+  const applySession = async (id: string) => {
+    if (!id || id === current?.id) return;
     setBusy(true);
-    try { await setSession({ data: { id: selSession } }); toast.success("Current session updated."); qc.invalidateQueries({ queryKey: ["reference"] }); qc.invalidateQueries({ queryKey: ["all-terms"] }); }
-    catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+    try {
+      await setSession({ data: { id } });
+      toast.success("Current session updated.");
+      qc.invalidateQueries({ queryKey: ["reference"] });
+      qc.invalidateQueries({ queryKey: ["all-terms"] });
+    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
   };
-  const applyTerm = async () => {
-    if (!selTerm || selTerm === currentTerm?.id) return;
+  const applyTerm = async (id: string) => {
+    if (!id || id === currentTerm?.id) return;
     setBusy(true);
-    try { await setTerm({ data: { id: selTerm } }); toast.success("Current term updated."); qc.invalidateQueries({ queryKey: ["all-terms"] }); }
-    catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+    try {
+      await setTerm({ data: { id } });
+      toast.success("Current term updated.");
+      qc.invalidateQueries({ queryKey: ["all-terms"] });
+    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
   };
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle className="text-base">Current Session & Term</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2">
-        <div>
-          <Label className="mb-1.5 block">Active session</Label>
-          <div className="flex gap-2">
-            <Select value={selSession} onValueChange={setSelSession}>
-              <SelectTrigger><SelectValue placeholder="Select session" /></SelectTrigger>
-              <SelectContent>
-                {sessions.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}{s.is_current ? " (current)" : ""}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button type="button" variant="outline" onClick={applySession} disabled={busy || !selSession || selSession === current?.id}>
-              <Check className="mr-1 h-4 w-4" /> Set
-            </Button>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">Currently: <span className="font-medium">{current?.name ?? "—"}</span></p>
+    <Card>
+      <CardContent className="space-y-5 p-6">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-5 w-5 text-primary" />
+          <h2 className="font-display text-lg font-semibold text-primary">Academic Period</h2>
         </div>
+
         <div>
-          <Label className="mb-1.5 block">Active term (in current session)</Label>
-          <div className="flex gap-2">
-            <Select value={selTerm} onValueChange={setSelTerm} disabled={sessionTerms.length === 0}>
-              <SelectTrigger><SelectValue placeholder={sessionTerms.length ? "Select term" : "No terms in current session"} /></SelectTrigger>
-              <SelectContent>
-                {sessionTerms.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.name}{t.is_current ? " (current)" : ""}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button type="button" variant="outline" onClick={applyTerm} disabled={busy || !selTerm || selTerm === currentTerm?.id}>
-              <Check className="mr-1 h-4 w-4" /> Set
-            </Button>
+          <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">Current Session</Label>
+          <Select value={current?.id ?? ""} onValueChange={applySession} disabled={!isSuper || busy}>
+            <SelectTrigger><SelectValue placeholder="Select session" /></SelectTrigger>
+            <SelectContent>
+              {sessions.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">Current Term</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {sessionTerms.length === 0 && <p className="col-span-3 text-xs text-muted-foreground">No terms in this session.</p>}
+            {sessionTerms.map((t) => {
+              const active = t.id === currentTerm?.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => applyTerm(t.id)}
+                  disabled={!isSuper || busy}
+                  className={`border px-2 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed ${
+                    active ? "border-primary bg-primary/10 text-primary" : "border-input bg-background text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {t.name.replace(/\s*Term$/i, "")}
+                </button>
+              );
+            })}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Currently: <span className="font-medium">{currentTerm?.name ?? "—"}</span></p>
+        </div>
+
+        <div className="flex items-center justify-between border-t pt-3">
+          <span className="inline-flex items-center gap-1.5 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" /> Live Now
+          </span>
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <History className="h-3.5 w-3.5" />
+            {currentTerm?.name ?? "—"} · {current?.name ?? "—"}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StatusTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-3 p-4">
+        <span className="flex h-10 w-10 items-center justify-center bg-muted text-primary">{icon}</span>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="font-display font-semibold text-primary">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -217,5 +275,5 @@ function CurrentSessionTermCard() {
 }
 
 function Row({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
-  return <div className={className}><Label className="mb-1.5 block">{label}</Label>{children}</div>;
+  return <div className={className}><Label className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</Label>{children}</div>;
 }
