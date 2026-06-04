@@ -188,36 +188,63 @@ function StatTile({
 }
 
 function BarRow({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
-  const pct = total ? Math.round((value / total) * 100) : 0;
+  const pct = total ? (value / total) * 100 : 0;
   return (
     <div>
       <div className="flex items-center justify-between text-sm">
-        <span className="flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${color}`} /> {label}</span>
-        <span className="text-muted-foreground"><span className="font-medium text-foreground">{value.toLocaleString()}</span> students</span>
+        <span className="flex items-center gap-2"><span className={`h-2.5 w-2.5 rounded-full ${color}`} /> {label}</span>
+        <span className="text-muted-foreground">
+          <span className="font-semibold text-foreground">{value.toLocaleString()}</span>{" "}
+          <span className="text-xs">({pct.toFixed(1)}%)</span>
+        </span>
       </div>
-      <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted"><div className={`h-full ${color}`} style={{ width: `${pct}%` }} /></div>
+      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted"><div className={`h-full ${color}`} style={{ width: `${pct}%` }} /></div>
     </div>
   );
 }
 
 function DistroVisual({ total, sect }: { total: number; sect: { NUR: number; PRI: number; SEC: number } }) {
   const t = sect.NUR + sect.PRI + sect.SEC || 1;
-  const secPct = Math.round((sect.SEC / t) * 100);
-  const priPct = Math.round((sect.PRI / t) * 100);
-  const nurPct = 100 - secPct - priPct;
+  // Donut geometry
+  const r = 70;
+  const c = 2 * Math.PI * r;
+  const segs = [
+    { value: sect.SEC, className: "text-primary" },
+    { value: sect.PRI, className: "text-primary/70" },
+    { value: sect.NUR, className: "text-gold" },
+  ];
+  let offset = 0;
   return (
-    <div className="relative mx-auto h-44 w-44 rounded-2xl border-2 border-primary p-2">
-      <div className="absolute inset-3 grid place-items-center rounded-xl bg-background">
+    <div className="relative mx-auto h-44 w-44">
+      <svg viewBox="0 0 180 180" className="h-full w-full -rotate-90">
+        <circle cx="90" cy="90" r={r} fill="none" stroke="currentColor" strokeWidth="20" className="text-muted" />
+        {segs.map((s, i) => {
+          const len = (s.value / t) * c;
+          const dash = `${len} ${c - len}`;
+          const el = (
+            <circle
+              key={i}
+              cx="90"
+              cy="90"
+              r={r}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="20"
+              strokeDasharray={dash}
+              strokeDashoffset={-offset}
+              className={s.className}
+            />
+          );
+          offset += len;
+          return el;
+        })}
+      </svg>
+      <div className="absolute inset-0 grid place-items-center">
         <div className="text-center">
           <div className="font-display text-2xl font-bold text-primary">{total.toLocaleString()}</div>
-          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Total</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Total Students</div>
         </div>
       </div>
-      <div className="absolute left-0 top-0 h-[60%] w-2 rounded-l bg-primary" />
-      <div className="absolute left-0 top-0 h-2 w-[55%] rounded-t bg-primary" />
-      <div className="absolute left-0 bottom-0 h-2 w-[40%] rounded-b bg-gold" />
-      <div className="absolute right-0 top-2 h-[35%] w-2 rounded-r bg-gold/70" />
-      <div className="sr-only">Sec {secPct}% Pri {priPct}% Nur {nurPct}%</div>
     </div>
   );
 }
