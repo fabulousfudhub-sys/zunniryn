@@ -40,9 +40,10 @@ function ClassesPage() {
   return (
     <div className="space-y-6 p-6 lg:p-8">
       <header>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Classes & Arms</h1>
-        <p className="text-sm text-muted-foreground">Manage academic classes (grouped by section) and class arms / streams.</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-primary">Classes &amp; Arms Management</h1>
+        <p className="text-sm text-muted-foreground">Configure academic levels, class structures, and class arms / streams.</p>
       </header>
+
 
       <Tabs defaultValue="classes" className="space-y-4">
         <TabsList>
