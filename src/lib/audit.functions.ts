@@ -29,7 +29,11 @@ export const listAuditLog = createServerFn({ method: "GET" })
     let profileMap = new Map<string, string>();
     if (actorIds.length) {
       const { data: profs } = await supabase.from("profiles").select("user_id, full_name, email").in("user_id", actorIds);
-      profileMap = new Map((profs ?? []).map((p) => [p.user_id, p.full_name ?? p.email ?? "—"]));
+      profileMap = new Map(
+        (profs ?? [])
+          .filter((p): p is typeof p & { user_id: string } => p.user_id != null)
+          .map((p) => [p.user_id, p.full_name ?? p.email ?? "—"]),
+      );
     }
 
     return (rows ?? []).map((r) => ({
