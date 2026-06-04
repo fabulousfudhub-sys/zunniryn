@@ -101,6 +101,19 @@ function ScratchCardsPage() {
   );
 }
 
+function StatTile({ label, value, accent, tone }: { label: string; value: number; accent?: boolean; tone?: "emerald" | "primary" | "destructive" }) {
+  const toneClass = tone === "emerald" ? "text-emerald-600"
+    : tone === "destructive" ? "text-destructive"
+    : tone === "primary" ? "text-primary" : "text-primary";
+  return (
+    <Card className={`p-5 ${accent ? "border-l-[3px] border-l-primary" : ""}`}>
+      <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+      <div className={`mt-2 font-display text-3xl font-bold ${toneClass}`}>{value.toLocaleString()}</div>
+    </Card>
+  );
+}
+
+
 function CardsTable() {
   const { data: list } = useSuspenseQuery(listQO);
   const [q, setQ] = useState("");
