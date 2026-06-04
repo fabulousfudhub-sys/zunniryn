@@ -14,262 +14,1223 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_sessions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          is_current: boolean
+          name: string
+          short_code: string
+          start_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          name: string
+          short_code: string
+          start_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          name?: string
+          short_code?: string
+          start_date?: string | null
+        }
+        Relationships: []
+      }
+      admission_sequence: {
+        Row: {
+          last_serial: number
+          section: Database["public"]["Enums"]["section_code"]
+          session_id: string
+        }
+        Insert: {
+          last_serial?: number
+          section: Database["public"]["Enums"]["section_code"]
+          session_id: string
+        }
+        Update: {
+          last_serial?: number
+          section?: Database["public"]["Enums"]["section_code"]
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_sequence_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          arm_id: string | null
+          audience: string
+          body: string
+          class_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          published: boolean
+          title: string
+        }
+        Insert: {
+          arm_id?: string | null
+          audience?: string
+          body: string
+          class_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published?: boolean
+          title: string
+        }
+        Update: {
+          arm_id?: string | null
+          audience?: string
+          body?: string
+          class_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
+      arms: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          arm_id: string
+          class_id: string
+          created_at: string
+          date: string
+          id: string
+          note: string | null
+          recorded_by: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+          term_id: string
+        }
+        Insert: {
+          arm_id: string
+          class_id: string
+          created_at?: string
+          date: string
+          id?: string
+          note?: string | null
+          recorded_by?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+          term_id: string
+        }
+        Update: {
+          arm_id?: string
+          class_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string | null
+          recorded_by?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id?: string
+          term_id?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
-          changes: Json | null
+          actor_id: string | null
           created_at: string
+          entity: string
+          entity_id: string | null
           id: string
-          record_id: string
-          table_name: string
-          user_id: string | null
+          new_value: Json | null
+          old_value: Json | null
         }
         Insert: {
           action: string
-          changes?: Json | null
+          actor_id?: string | null
           created_at?: string
+          entity: string
+          entity_id?: string | null
           id?: string
-          record_id: string
-          table_name: string
-          user_id?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
         }
         Update: {
           action?: string
-          changes?: Json | null
+          actor_id?: string | null
           created_at?: string
+          entity?: string
+          entity_id?: string | null
           id?: string
-          record_id?: string
-          table_name?: string
-          user_id?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
         }
         Relationships: []
       }
-      comp_plans: {
+      classes: {
         Row: {
           created_at: string
-          created_by: string | null
-          effective_date: string
           id: string
-          is_active: boolean
+          level_order: number
           name: string
-          updated_at: string
+          section: Database["public"]["Enums"]["section_code"]
         }
         Insert: {
           created_at?: string
-          created_by?: string | null
-          effective_date: string
           id?: string
-          is_active?: boolean
+          level_order: number
           name: string
-          updated_at?: string
+          section: Database["public"]["Enums"]["section_code"]
         }
         Update: {
           created_at?: string
-          created_by?: string | null
-          effective_date?: string
           id?: string
-          is_active?: boolean
+          level_order?: number
           name?: string
-          updated_at?: string
+          section?: Database["public"]["Enums"]["section_code"]
         }
         Relationships: []
       }
-      comp_tiers: {
+      employee_sequence: {
         Row: {
-          commission_rate: number
-          comp_plan_id: string
-          created_at: string
-          id: string
-          max_deal_size: number | null
-          min_deal_size: number
-          tier_name: string
+          id: number
+          last_serial: number
         }
         Insert: {
-          commission_rate: number
-          comp_plan_id: string
-          created_at?: string
-          id?: string
-          max_deal_size?: number | null
-          min_deal_size?: number
-          tier_name: string
+          id?: number
+          last_serial?: number
         }
         Update: {
-          commission_rate?: number
-          comp_plan_id?: string
+          id?: number
+          last_serial?: number
+        }
+        Relationships: []
+      }
+      form_masters: {
+        Row: {
+          arm_id: string
+          class_id: string
+          created_at: string
+          id: string
+          session_id: string
+          staff_id: string
+        }
+        Insert: {
+          arm_id: string
+          class_id: string
           created_at?: string
           id?: string
-          max_deal_size?: number | null
-          min_deal_size?: number
-          tier_name?: string
+          session_id: string
+          staff_id: string
+        }
+        Update: {
+          arm_id?: string
+          class_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          staff_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "comp_tiers_comp_plan_id_fkey"
-            columns: ["comp_plan_id"]
+            foreignKeyName: "form_masters_arm_id_fkey"
+            columns: ["arm_id"]
             isOneToOne: false
-            referencedRelation: "comp_plans"
+            referencedRelation: "arms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_masters_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_masters_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_masters_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
       }
-      deals: {
+      grade_scale: {
         Row: {
-          close_date: string
-          commission_amount: number
           created_at: string
-          created_by: string | null
-          deal_size: number
-          deal_type: string
-          deleted_at: string | null
+          grade: string
           id: string
-          notes: string | null
-          rep_id: string
-          status: Database["public"]["Enums"]["deal_status"]
-          tier_applied: string | null
-          updated_at: string
+          max_score: number
+          min_score: number
+          remark: string
         }
         Insert: {
-          close_date: string
-          commission_amount?: number
           created_at?: string
-          created_by?: string | null
-          deal_size: number
-          deal_type: string
-          deleted_at?: string | null
+          grade: string
           id?: string
-          notes?: string | null
-          rep_id: string
-          status?: Database["public"]["Enums"]["deal_status"]
-          tier_applied?: string | null
-          updated_at?: string
+          max_score: number
+          min_score: number
+          remark: string
         }
         Update: {
-          close_date?: string
-          commission_amount?: number
           created_at?: string
-          created_by?: string | null
-          deal_size?: number
-          deal_type?: string
-          deleted_at?: string | null
+          grade?: string
           id?: string
-          notes?: string | null
-          rep_id?: string
-          status?: Database["public"]["Enums"]["deal_status"]
-          tier_applied?: string | null
-          updated_at?: string
+          max_score?: number
+          min_score?: number
+          remark?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "deals_rep_id_fkey"
-            columns: ["rep_id"]
-            isOneToOne: false
-            referencedRelation: "reps"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parent_students: {
+        Row: {
+          created_at: string
+          id: string
+          parent_user_id: string
+          relationship: string | null
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parent_user_id: string
+          relationship?: string | null
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parent_user_id?: string
+          relationship?: string | null
+          student_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string | null
+          full_name: string | null
           id: string
-          name: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      result_sheets: {
+        Row: {
+          arm_id: string
+          average: number | null
+          class_id: string
+          created_at: string
+          form_master_comment: string | null
+          id: string
+          position: number | null
+          principal_comment: string | null
+          promoted: boolean | null
+          published_at: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["result_status"]
+          student_id: string
+          term_id: string
+          total_obtainable: number | null
+          total_score: number | null
           updated_at: string
         }
         Insert: {
+          arm_id: string
+          average?: number | null
+          class_id: string
           created_at?: string
-          email?: string | null
-          id: string
-          name?: string | null
+          form_master_comment?: string | null
+          id?: string
+          position?: number | null
+          principal_comment?: string | null
+          promoted?: boolean | null
+          published_at?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["result_status"]
+          student_id: string
+          term_id: string
+          total_obtainable?: number | null
+          total_score?: number | null
           updated_at?: string
         }
         Update: {
+          arm_id?: string
+          average?: number | null
+          class_id?: string
           created_at?: string
-          email?: string | null
+          form_master_comment?: string | null
           id?: string
-          name?: string | null
+          position?: number | null
+          principal_comment?: string | null
+          promoted?: boolean | null
+          published_at?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["result_status"]
+          student_id?: string
+          term_id?: string
+          total_obtainable?: number | null
+          total_score?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "result_sheets_arm_id_fkey"
+            columns: ["arm_id"]
+            isOneToOne: false
+            referencedRelation: "arms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_sheets_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_sheets_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_sheets_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_sheets_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      quota_tiers: {
+      school_settings: {
         Row: {
-          color: string
-          created_at: string
-          id: string
-          max_attainment: number | null
-          min_attainment: number
-          rate_multiplier: number
-          tier_name: string
+          acronym: string
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          id: number
+          location: string
+          logo_url: string | null
+          motto: string | null
+          principal_name: string | null
+          school_name: string
+          scratch_card_default_uses: number
+          updated_at: string
         }
         Insert: {
-          color?: string
-          created_at?: string
-          id?: string
-          max_attainment?: number | null
-          min_attainment?: number
-          rate_multiplier?: number
-          tier_name: string
+          acronym?: string
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          id?: number
+          location?: string
+          logo_url?: string | null
+          motto?: string | null
+          principal_name?: string | null
+          school_name?: string
+          scratch_card_default_uses?: number
+          updated_at?: string
         }
         Update: {
-          color?: string
-          created_at?: string
-          id?: string
-          max_attainment?: number | null
-          min_attainment?: number
-          rate_multiplier?: number
-          tier_name?: string
+          acronym?: string
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          id?: number
+          location?: string
+          logo_url?: string | null
+          motto?: string | null
+          principal_name?: string | null
+          school_name?: string
+          scratch_card_default_uses?: number
+          updated_at?: string
         }
         Relationships: []
       }
-      reps: {
+      scores: {
         Row: {
+          arm_id: string
+          ca1: number | null
+          ca2: number | null
+          ca3: number | null
+          class_id: string
           created_at: string
-          email: string | null
+          entered_by: string | null
+          exam: number | null
+          grade: string | null
           id: string
-          name: string
-          quota_period: Database["public"]["Enums"]["quota_period"]
-          quota_target: number
-          team: string
+          remark: string | null
+          session_id: string
+          student_id: string
+          subject_id: string
+          term_id: string
+          total: number | null
+          updated_at: string
+        }
+        Insert: {
+          arm_id: string
+          ca1?: number | null
+          ca2?: number | null
+          ca3?: number | null
+          class_id: string
+          created_at?: string
+          entered_by?: string | null
+          exam?: number | null
+          grade?: string | null
+          id?: string
+          remark?: string | null
+          session_id: string
+          student_id: string
+          subject_id: string
+          term_id: string
+          total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          arm_id?: string
+          ca1?: number | null
+          ca2?: number | null
+          ca3?: number | null
+          class_id?: string
+          created_at?: string
+          entered_by?: string | null
+          exam?: number | null
+          grade?: string | null
+          id?: string
+          remark?: string | null
+          session_id?: string
+          student_id?: string
+          subject_id?: string
+          term_id?: string
+          total?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_arm_id_fkey"
+            columns: ["arm_id"]
+            isOneToOne: false
+            referencedRelation: "arms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scratch_cards: {
+        Row: {
+          assigned_student_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          max_uses: number
+          pin: string
+          session_id: string
+          status: Database["public"]["Enums"]["scratch_card_status"]
+          term_id: string | null
+          uses: number
+        }
+        Insert: {
+          assigned_student_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          max_uses?: number
+          pin: string
+          session_id: string
+          status?: Database["public"]["Enums"]["scratch_card_status"]
+          term_id?: string | null
+          uses?: number
+        }
+        Update: {
+          assigned_student_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          max_uses?: number
+          pin?: string
+          session_id?: string
+          status?: Database["public"]["Enums"]["scratch_card_status"]
+          term_id?: string | null
+          uses?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scratch_cards_assigned_student_id_fkey"
+            columns: ["assigned_student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scratch_cards_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scratch_cards_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff: {
+        Row: {
+          address: string | null
+          created_at: string
+          date_employed: string
+          department: string | null
+          email: string | null
+          employee_no: string
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"] | null
+          id: string
+          is_active: boolean
+          lga: string | null
+          phone: string | null
+          qualification: string | null
+          state_of_origin: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string
+          date_employed?: string
+          department?: string | null
           email?: string | null
+          employee_no: string
+          full_name: string
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
-          name: string
-          quota_period?: Database["public"]["Enums"]["quota_period"]
-          quota_target?: number
-          team?: string
+          is_active?: boolean
+          lga?: string | null
+          phone?: string | null
+          qualification?: string | null
+          state_of_origin?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string
+          date_employed?: string
+          department?: string | null
           email?: string | null
+          employee_no?: string
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
           id?: string
-          name?: string
-          quota_period?: Database["public"]["Enums"]["quota_period"]
-          quota_target?: number
-          team?: string
+          is_active?: boolean
+          lga?: string | null
+          phone?: string | null
+          qualification?: string | null
+          state_of_origin?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Relationships: []
       }
+      staff_attendance: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          date: string
+          id: string
+          note: string | null
+          recorded_by: string | null
+          staff_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          note?: string | null
+          recorded_by?: string | null
+          staff_id: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string | null
+          recorded_by?: string | null
+          staff_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+        }
+        Relationships: []
+      }
+      staff_leave: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          leave_type: string
+          reason: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          staff_id: string
+          start_date: string
+          status: Database["public"]["Enums"]["leave_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          leave_type: string
+          reason?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          staff_id: string
+          start_date: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          staff_id?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_class_history: {
+        Row: {
+          arm_id: string
+          class_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          promoted_from_arm_id: string | null
+          promoted_from_class_id: string | null
+          session_id: string
+          student_id: string
+        }
+        Insert: {
+          arm_id: string
+          class_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          promoted_from_arm_id?: string | null
+          promoted_from_class_id?: string | null
+          session_id: string
+          student_id: string
+        }
+        Update: {
+          arm_id?: string
+          class_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          promoted_from_arm_id?: string | null
+          promoted_from_class_id?: string | null
+          session_id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      student_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          file_name: string
+          file_path: string
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          student_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          file_name: string
+          file_path: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          student_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          student_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          address: string | null
+          admission_date: string
+          admission_no: string
+          admission_session_id: string | null
+          created_at: string
+          current_arm_id: string | null
+          current_class_id: string | null
+          date_of_birth: string | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"] | null
+          id: string
+          is_active: boolean
+          lga: string | null
+          parent_email: string | null
+          parent_name: string | null
+          parent_occupation: string | null
+          parent_phone: string | null
+          passport_url: string | null
+          state_of_origin: string | null
+          status: Database["public"]["Enums"]["student_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          admission_date?: string
+          admission_no: string
+          admission_session_id?: string | null
+          created_at?: string
+          current_arm_id?: string | null
+          current_class_id?: string | null
+          date_of_birth?: string | null
+          full_name: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          is_active?: boolean
+          lga?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_occupation?: string | null
+          parent_phone?: string | null
+          passport_url?: string | null
+          state_of_origin?: string | null
+          status?: Database["public"]["Enums"]["student_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          admission_date?: string
+          admission_no?: string
+          admission_session_id?: string | null
+          created_at?: string
+          current_arm_id?: string | null
+          current_class_id?: string | null
+          date_of_birth?: string | null
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          is_active?: boolean
+          lga?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_occupation?: string | null
+          parent_phone?: string | null
+          passport_url?: string | null
+          state_of_origin?: string | null
+          status?: Database["public"]["Enums"]["student_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_admission_session_id_fkey"
+            columns: ["admission_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_current_arm_id_fkey"
+            columns: ["current_arm_id"]
+            isOneToOne: false
+            referencedRelation: "arms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_current_class_id_fkey"
+            columns: ["current_class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subject_offerings: {
+        Row: {
+          arm_id: string
+          class_id: string
+          created_at: string
+          id: string
+          session_id: string
+          subject_id: string
+        }
+        Insert: {
+          arm_id: string
+          class_id: string
+          created_at?: string
+          id?: string
+          session_id: string
+          subject_id: string
+        }
+        Update: {
+          arm_id?: string
+          class_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_offerings_arm_id_fkey"
+            columns: ["arm_id"]
+            isOneToOne: false
+            referencedRelation: "arms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_offerings_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_offerings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_offerings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          code: string | null
+          created_at: string
+          id: string
+          max_level_order: number | null
+          min_level_order: number | null
+          name: string
+          restricted_arm_ids: string[]
+          section: Database["public"]["Enums"]["section_code"] | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          max_level_order?: number | null
+          min_level_order?: number | null
+          name: string
+          restricted_arm_ids?: string[]
+          section?: Database["public"]["Enums"]["section_code"] | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          max_level_order?: number | null
+          min_level_order?: number | null
+          name?: string
+          restricted_arm_ids?: string[]
+          section?: Database["public"]["Enums"]["section_code"] | null
+        }
+        Relationships: []
+      }
+      teacher_assignments: {
+        Row: {
+          arm_id: string
+          class_id: string
+          created_at: string
+          id: string
+          session_id: string
+          staff_id: string
+          subject_id: string
+        }
+        Insert: {
+          arm_id: string
+          class_id: string
+          created_at?: string
+          id?: string
+          session_id: string
+          staff_id: string
+          subject_id: string
+        }
+        Update: {
+          arm_id?: string
+          class_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          staff_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_assignments_arm_id_fkey"
+            columns: ["arm_id"]
+            isOneToOne: false
+            referencedRelation: "arms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_assignments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_assignments_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_assignments_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      terms: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          is_current: boolean
+          name: Database["public"]["Enums"]["term_name"]
+          session_id: string
+          start_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          name: Database["public"]["Enums"]["term_name"]
+          session_id: string
+          start_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_current?: boolean
+          name?: Database["public"]["Enums"]["term_name"]
+          session_id?: string
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terms_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
+          created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -281,6 +1242,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      compute_grade: {
+        Args: { _score: number }
+        Returns: {
+          grade: string
+          remark: string
+        }[]
+      }
+      generate_admission_no: {
+        Args: {
+          _section: Database["public"]["Enums"]["section_code"]
+          _session_id: string
+        }
+        Returns: string
+      }
+      generate_employee_no: { Args: never; Returns: string }
+      has_any_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -288,11 +1271,59 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_parent_of: {
+        Args: { _student_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_sheet_locked: {
+        Args: { _student_id: string; _term_id: string }
+        Returns: boolean
+      }
+      is_teacher_assigned: {
+        Args: {
+          _arm_id: string
+          _class_id: string
+          _session_id: string
+          _subject_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      recompute_positions: {
+        Args: { _arm_id: string; _class_id: string; _term_id: string }
+        Returns: undefined
+      }
+      recompute_result_sheet: {
+        Args: { _student_id: string; _term_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      app_role: "admin" | "rep"
-      deal_status: "closed" | "open"
-      quota_period: "month" | "quarter" | "year"
+      app_role:
+        | "super_admin"
+        | "director"
+        | "principal"
+        | "vice_principal"
+        | "admission_officer"
+        | "teacher"
+        | "form_master"
+        | "exam_officer"
+        | "parent"
+        | "student"
+      attendance_status: "present" | "absent" | "late" | "excused"
+      gender: "Male" | "Female"
+      leave_status: "pending" | "approved" | "rejected" | "cancelled"
+      result_status: "draft" | "submitted" | "approved" | "published" | "locked"
+      scratch_card_status: "unused" | "used" | "revoked"
+      section_code: "NUR" | "PRI" | "SEC"
+      student_status:
+        | "active"
+        | "graduated"
+        | "withdrawn"
+        | "suspended"
+        | "transferred"
+        | "alumni"
+      term_name: "First" | "Second" | "Third"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -420,9 +1451,33 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "rep"],
-      deal_status: ["closed", "open"],
-      quota_period: ["month", "quarter", "year"],
+      app_role: [
+        "super_admin",
+        "director",
+        "principal",
+        "vice_principal",
+        "admission_officer",
+        "teacher",
+        "form_master",
+        "exam_officer",
+        "parent",
+        "student",
+      ],
+      attendance_status: ["present", "absent", "late", "excused"],
+      gender: ["Male", "Female"],
+      leave_status: ["pending", "approved", "rejected", "cancelled"],
+      result_status: ["draft", "submitted", "approved", "published", "locked"],
+      scratch_card_status: ["unused", "used", "revoked"],
+      section_code: ["NUR", "PRI", "SEC"],
+      student_status: [
+        "active",
+        "graduated",
+        "withdrawn",
+        "suspended",
+        "transferred",
+        "alumni",
+      ],
+      term_name: ["First", "Second", "Third"],
     },
   },
 } as const

@@ -1,69 +1,65 @@
+# Zinnuryn Academy — Build Plan
 
+A 22-module school management system is too large for a single turn. I'll ship it in 6 phases. Each phase ends with a working, testable slice. You approve once; we ship phases sequentially.
 
-# Plan: Performance audit and code cleanup
+## Design system (applies to all phases)
+- Palette: Emerald Prestige (deep emerald `#064e3b`, emerald `#0d7a5f`, gold `#c9a84c`, cream `#f5f0e0`)
+- Typography: serif display (Playfair) + sans body (Inter)
+- Generated placeholder logo (academic crest, emerald + gold)
+- Sidebar shell layout for all authenticated pages
 
-## Root causes identified
+## Phase 1 — Foundation (this turn)
+- Lovable Cloud enabled
+- DB: `app_role` enum, `user_roles`, `profiles`, `sessions`, `terms`, `classes`, `arms`, `subjects`, `students`, `class_arms` (with RLS + grants)
+- `has_role()`, `has_any_role()` security-definer functions
+- Auto-create profile + default role on signup trigger
+- Auth (email/password + Google) at `/auth`
+- Authenticated layout with sidebar, role-aware nav
+- Landing page (school hero, sections, CTA to portal)
+- Dashboard stub (role-based welcome)
+- Seed data: 3 sections (NUR/PRI/SEC), all classes, arms A–D, default subjects
 
-### 1. Auth middleware creates a new Supabase client + calls `getUser()` on EVERY server function call
-The `requireSupabaseAuth` middleware (line 51) calls `serverSupabase.auth.getUser(token)` which makes a network request to the auth server on every single server function invocation. When navigating to the dashboard, this happens at least once. When navigating between pages, each route's loader triggers another `getUser()` call. This is the primary bottleneck.
+## Phase 2 — People & academic structure
+- Student registration with auto-generated admission number (ZAB/YY/SEC/####)
+- Staff management (profile, qualification, employment date, multi-role assignment)
+- Subject ↔ class assignment matrix
+- Teacher ↔ subject ↔ class+arm assignment (many-to-many)
+- Form master assignment
+- Bulk teacher assignment
 
-### 2. Redundant data fetching across routes
-- `getDashboard` fetches reps, deals, and quota_tiers
-- `getReps` fetches reps, deals, and quota_tiers (same data)
-- `getDeals` fetches deals and reps
-- `getCompPlans` fetches plans, tiers, quota_tiers, and reps
+## Phase 3 — Results engine
+- Score entry grid (CA1 / CA2 / CA3 / Exam) — teacher sees only their assignments
+- Auto-compute total, grade, remark, average, class position
+- Configurable grade scale (settings table)
+- Result status workflow: draft → submitted → approved → published → locked
+- Result locking with override (super admin / exam officer)
+- Bulk score upload (Excel/CSV)
 
-Every page navigation re-fetches overlapping datasets from the database. The TanStack Query cache helps on the client, but each server function still runs independently.
+## Phase 4 — Output documents & parent access
+- Report card (per student per term, PDF export)
+- Broadsheet (class results table, PDF + Excel)
+- Transcript (full academic history, PDF)
+- Scratch card system: generate, list, mark used; parent result lookup by PIN
+- Promotion history tracking
 
-### 3. `createDeal` / `updateDeal` make 4-5 sequential DB queries
-These functions query comp_plans → comp_tiers → reps → deals → quota_tiers sequentially instead of parallelizing where possible.
+## Phase 5 — Operations
+- Attendance (student + staff, daily entry, summaries on report card)
+- Staff leave (apply / approve / reject)
+- Notifications (in-app + result-publication trigger)
+- Student documents upload (birth cert, admission letter, etc.) — storage bucket
+- Audit log of sensitive actions (score edits, result approvals, unlocks)
 
-### 4. Landing page imports `framer-motion` — heavy bundle for a single page
-The 429-line landing page imports the full `motion` component from framer-motion, adding significant JS to the initial bundle.
+## Phase 6 — Admin & analytics
+- School settings module (name, acronym, logo, grading scale, scratch card rules)
+- Role-based dashboards (Director, Principal, Admission, Exam Officer)
+- Backup/restore (super admin)
+- Bulk promotion engine (end-of-session)
 
-## Changes
+## Technical notes
+- Roles stored in separate `user_roles` table (never on profiles) — prevents privilege escalation
+- All policies use `has_role()` security-definer to avoid RLS recursion
+- A user can hold multiple roles simultaneously (teacher + form master + exam officer all possible)
+- Server functions (`createServerFn`) for all writes; RLS as backstop
+- Result locking enforced at both DB trigger and policy level
 
-### 1. Cache auth validation to avoid repeated `getUser()` calls
-**File: `src/integrations/supabase/auth-middleware.ts`**
-- Instead of calling `getUser(token)` every time, decode the JWT locally to extract user ID and expiry, then only call `getUser()` if the token needs full validation (e.g., first request). Since the token is already verified by the Supabase client and passed as a Bearer token, we can trust the JWT claims for most operations.
-- Use a simple in-memory Map with token → user data, TTL of 60 seconds. This avoids the auth roundtrip on rapid page navigations.
-
-### 2. Parallelize sequential queries in `createDeal` and `updateDeal`
-**File: `src/lib/server-functions.ts`**
-- In `createDeal`: fetch comp_plan + rep + existing deals + quota_tiers in parallel with `Promise.all` instead of 4 sequential awaits (lines 110-142)
-- In `updateDeal`: same pattern — fetch existing deal, comp_plan, rep, other deals, and quota_tiers with fewer sequential rounds (lines 282-324)
-
-### 3. Deduplicate `formatCurrency` helper
-**File: `src/lib/format-utils.ts`** (new)
-- Extract the repeated `formatCurrency` function (duplicated in dashboard.tsx, deals.tsx, reps.index.tsx) into a shared utility
-- Update all three files to import from the shared module
-
-### 4. Optimize landing page bundle
-**File: `src/routes/index.tsx`**
-- Replace `framer-motion` `motion` components with CSS animations (the project already has `animate-fade-in` defined in styles.css)
-- Remove the `framer-motion` dependency from `package.json` if no other file uses it
-- This reduces the landing page JS bundle significantly
-
-### 5. Remove stale `tailwind.config.ts` reference
-The dev logs show repeated errors: `Could not resolve "/dev-server/tailwind.config.ts"`. This file doesn't exist (the project uses Tailwind v4 with CSS-based config). This causes a build warning on every restart.
-**File: check if any config references `tailwind.config.ts`** and remove the reference.
-
-## File summary
-
-| File | Change |
-|---|---|
-| `src/integrations/supabase/auth-middleware.ts` | Add in-memory token cache to skip repeated `getUser()` calls |
-| `src/lib/server-functions.ts` | Parallelize sequential DB queries in `createDeal` and `updateDeal` |
-| `src/lib/format-utils.ts` | New shared `formatCurrency` utility |
-| `src/routes/_authenticated/dashboard.tsx` | Import shared `formatCurrency` |
-| `src/routes/_authenticated/deals.tsx` | Import shared `formatCurrency` |
-| `src/routes/_authenticated/reps.index.tsx` | Import shared `formatCurrency` |
-| `src/routes/index.tsx` | Replace framer-motion with CSS animations |
-| `package.json` | Remove `framer-motion` if unused elsewhere |
-
-## Technical details
-- The JWT token cache uses a `Map<string, { user, expiry }>` cleared after 60 seconds. This is safe because the token itself is cryptographically signed — if it's valid, the claims are trustworthy.
-- `Promise.all` on the DB queries in `createDeal` reduces 4 sequential network hops to 2 (first round: plan + rep + existing deals + quota_tiers, second round: the insert).
-- CSS `@keyframes` already exist in `styles.css` for fade-in animations, so removing framer-motion requires only swapping `<motion.div>` for `<div className="animate-fade-in">` with appropriate delays via `animation-delay` style props.
-- The `tailwind.config.ts` error is cosmetic but adds noise to logs; removing any stale reference cleans up the dev experience.
-
+After you approve, I'll build Phase 1 and report back. Subsequent phases are one prompt each (e.g. "do phase 2").

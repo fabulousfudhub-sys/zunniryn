@@ -1,224 +1,246 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
+import {
+  Users, GraduationCap, CalendarDays, ClipboardCheck, ArrowUpRight, Calendar,
+  Compass, Key, DatabaseBackup, ChevronDown,
+} from "lucide-react";
+import { useState } from "react";
+import { getMe, type AppRole } from "@/lib/me.functions";
+import { getDashboardStats } from "@/lib/dashboard.functions";
+import { listAuditLog } from "@/lib/audit.functions";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, FileText, Users, TrendingUp } from "lucide-react";
-import { dashboardQueryOptions } from "@/lib/query-options";
-import { cn } from "@/lib/utils";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const statsQO = queryOptions({ queryKey: ["dashboard-stats"], queryFn: () => getDashboardStats() });
+const meQO = queryOptions({ queryKey: ["me"], queryFn: () => getMe() });
+const auditQO = queryOptions({
+  queryKey: ["audit-recent"],
+  queryFn: () => listAuditLog({ data: { limit: 6 } }),
+});
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(dashboardQueryOptions()),
+  loader: ({ context }) => context.queryClient.ensureQueryData(statsQO),
   component: DashboardPage,
 });
 
-import { formatCurrency } from "@/lib/format-utils";
-
-const tierColorMap: Record<string, string> = {
-  destructive: "bg-destructive/15 text-destructive border-destructive/20",
-  warning: "bg-warning/15 text-warning-foreground border-warning/20",
-  success: "bg-success/15 text-success border-success/20",
-  primary: "bg-primary/15 text-primary border-primary/20",
-};
-
-const progressColorMap: Record<string, string> = {
-  destructive: "[&>[data-slot=indicator]]:bg-destructive",
-  warning: "[&>[data-slot=indicator]]:bg-warning",
-  success: "[&>[data-slot=indicator]]:bg-success",
-  primary: "[&>[data-slot=indicator]]:bg-primary",
-};
-
-const DONUT_COLORS = ["#159A9C", "#002333", "#B4BEC9", "#DEEFE7"];
-
 function DashboardPage() {
-  const { data } = useSuspenseQuery(dashboardQueryOptions());
+  const { data: stats } = useSuspenseQuery(statsQO);
+  const { data: me } = useSuspenseQuery(meQO);
+  const audit = useQuery(auditQO);
+  const has = (r: AppRole) => me.roles.includes(r) || me.roles.includes("super_admin");
+  const [scope, setScope] = useState<"Current Session" | "All Time">("Current Session");
 
-  const donutData = data.tierCounts.map((tier) => ({
-    name: tier.tier_name,
-    value: tier.count,
-  }));
+  const resultPct = (() => {
+    const total = stats.pendingResults + stats.publishedResults + stats.approvalQueue;
+    return total ? Math.round((stats.publishedResults / total) * 100) : 0;
+  })();
 
-  const barData = [...data.reps]
-    .sort((a, b) => b.totalRevenue - a.totalRevenue)
-    .slice(0, 8)
-    .map((rep) => ({
-      name: rep.name.split(" ")[0],
-      revenue: Math.round(rep.totalRevenue),
-      commission: Math.round(rep.totalCommission),
-    }));
+  const sect = stats.sectionDistribution;
+  const total = sect.NUR + sect.PRI + sect.SEC || stats.students || 1;
 
   return (
-    <AppLayout>
-      <div className="space-y-4 sm:space-y-6">
-        <div className="animate-fade-in">
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Q1 2026 commission overview</p>
-        </div>
+    <div className="p-4 sm:p-6 lg:p-8">
+      {/* Top stat strip */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile label="Total Students" value={stats.students.toLocaleString()} hint="+12% from last term" icon={Users} accent />
+        <StatTile label="Total Staff" value={stats.staff.toLocaleString()} hint={`${stats.approvalQueue} pending approvals`} icon={GraduationCap} accent />
+        <StatTile
+          label="Active Session"
+          value={stats.currentSession ?? "—"}
+          hint={stats.currentTerm ?? "—"}
+          icon={CalendarDays}
+          accent
+        />
+        <StatTile label="Result Status" value={`${resultPct}%`} hint="Published" icon={ClipboardCheck} accent progress={resultPct} />
+      </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 animate-fade-in" style={{ animationDelay: "0.05s", animationFillMode: "both" }}>
-          <MetricCard title="Total commissions" value={formatCurrency(data.totalCommissions)} subtitle="Q1 2026 YTD" icon={DollarSign} trend={{ value: "12% vs Q4", positive: true }} />
-          <MetricCard title="Deals closed" value={String(data.totalDeals)} subtitle="Across all reps" icon={FileText} />
-          <MetricCard title="Avg deal size" value={formatCurrency(data.avgDealSize)} icon={TrendingUp} />
-          <MetricCard title="Active reps" value={String(data.reps.length)} subtitle={`${data.tierCounts.find((t) => t.tier_name === "On target")?.count ?? 0} on target`} icon={Users} />
-        </div>
-
-        {/* Charts row */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
-          <Card>
-            <CardHeader className="pb-2 px-4 sm:px-6">
-              <CardTitle className="text-xs sm:text-sm font-semibold">Tier distribution</CardTitle>
-            </CardHeader>
-            <CardContent className="px-2 sm:px-6">
-              <div className="h-[200px] sm:h-[240px] flex items-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={donutData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="40%"
-                      outerRadius="65%"
-                      paddingAngle={3}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {donutData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => [`${value} reps`, ""]} />
-                    <Legend wrapperStyle={{ fontSize: "11px" }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2 px-4 sm:px-6">
-              <CardTitle className="text-xs sm:text-sm font-semibold">Revenue vs commission</CardTitle>
-            </CardHeader>
-            <CardContent className="px-2 sm:px-6">
-              <div className="h-[200px] sm:h-[240px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={barData} barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
-                    <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} width={45} />
-                    <Tooltip formatter={(value: number) => [formatCurrency(value), ""]} />
-                    <Legend wrapperStyle={{ fontSize: "11px" }} />
-                    <Bar dataKey="revenue" name="Revenue" fill="#159A9C" />
-                    <Bar dataKey="commission" name="Commission" fill="#002333" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Rep performance list view */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
-          <h2 className="text-xs sm:text-sm font-semibold mb-3">Rep performance</h2>
-
-          {/* Mobile card view */}
-          <div className="space-y-3 md:hidden">
-            {data.reps.map((rep) => (
-              <Link key={rep.id} to="/reps/$repId" params={{ repId: rep.id }} className="block">
-                <div className="rounded-lg border border-border/50 bg-card p-3.5 hover:bg-muted/20 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground">
-                        {rep.name.split(" ").map((n: string) => n[0]).join("")}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{rep.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{rep.team}</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className={cn("text-[10px] font-medium border", tierColorMap[rep.quotaTier?.color ?? "primary"])}>
-                      {rep.quotaTier?.tier_name ?? "Unknown"}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-center mt-3">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Revenue</p>
-                      <p className="text-xs font-semibold">{formatCurrency(rep.totalRevenue)}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Commission</p>
-                      <p className="text-xs font-semibold text-success">{formatCurrency(rep.totalCommission)}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase">Attainment</p>
-                      <p className="text-xs font-semibold">{Math.round(rep.attainment)}%</p>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <Progress
-                      value={Math.min(rep.attainment, 100)}
-                      className={cn("h-1.5 bg-secondary", progressColorMap[rep.quotaTier?.color ?? "primary"])}
-                    />
-                  </div>
-                </div>
-              </Link>
-            ))}
+      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        {/* Distribution */}
+        <Card className="lg:col-span-2 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="font-display text-xl font-semibold text-primary">Student Distribution</h2>
+              <p className="text-xs text-muted-foreground">Enrollment breakdown by section</p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted">
+                {scope} <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setScope("Current Session")}>Current Session</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setScope("All Time")}>All Time</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          {/* Desktop table view */}
-          <Card className="hidden md:block overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted/30">
-                    <th className="px-4 py-2.5 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Name</th>
-                    <th className="px-4 py-2.5 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Team</th>
-                    <th className="px-4 py-2.5 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Deals</th>
-                    <th className="px-4 py-2.5 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Revenue</th>
-                    <th className="px-4 py-2.5 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Commission</th>
-                    <th className="px-4 py-2.5 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Attainment</th>
-                    <th className="px-4 py-2.5 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Tier</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.reps.map((rep) => (
-                    <tr key={rep.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors cursor-pointer">
-                      <td className="px-4 py-3">
-                        <Link to="/reps/$repId" params={{ repId: rep.id }} className="flex items-center gap-2.5">
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground">
-                            {rep.name.split(" ").map((n: string) => n[0]).join("")}
-                          </div>
-                          <span className="font-medium text-foreground">{rep.name}</span>
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{rep.team}</td>
-                      <td className="px-4 py-3 text-foreground">{rep.dealCount}</td>
-                      <td className="px-4 py-3 font-semibold text-foreground">{formatCurrency(rep.totalRevenue)}</td>
-                      <td className="px-4 py-3 font-semibold text-success">{formatCurrency(rep.totalCommission)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2 min-w-[120px]">
-                          <Progress
-                            value={Math.min(rep.attainment, 100)}
-                            className={cn("h-1.5 flex-1 bg-secondary", progressColorMap[rep.quotaTier?.color ?? "primary"])}
-                          />
-                          <span className="text-xs font-medium text-foreground w-10 text-right">{Math.round(rep.attainment)}%</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="outline" className={cn("text-[10px] font-medium border", tierColorMap[rep.quotaTier?.color ?? "primary"])}>
-                          {rep.quotaTier?.tier_name ?? "Unknown"}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="mt-6 grid items-center gap-6 sm:grid-cols-[180px_1fr]">
+            <DistroVisual total={stats.students} sect={sect} />
+            <div className="space-y-4">
+              <BarRow label="Secondary" value={sect.SEC} total={total} color="bg-primary" />
+              <BarRow label="Primary" value={sect.PRI} total={total} color="bg-primary/70" />
+              <BarRow label="Nursery" value={sect.NUR} total={total} color="bg-gold" />
             </div>
-          </Card>
+          </div>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card className="p-5">
+          <h2 className="font-display text-xl font-semibold text-primary">Quick Actions</h2>
+          <div className="mt-4 space-y-3">
+            <QuickAction icon={Calendar} title="Manage Sessions" subtitle="Update academic calendar" to="/settings" />
+            <QuickAction icon={Compass} title="Configure Grading" subtitle="Edit score ranges & marks" to="/grading" />
+            <QuickAction icon={Key} title="Generate PINs" subtitle="Batch scratch card tokens" to="/scratch-cards" />
+            <QuickAction icon={DatabaseBackup} title="System Backup" subtitle="Last backup: 2h ago" to="/exports" />
+          </div>
+        </Card>
+      </div>
+
+      {/* Recent System Activity */}
+      <Card className="mt-6 p-5">
+        <div className="flex items-end justify-between gap-3 mb-4">
+          <div>
+            <h2 className="font-display text-xl font-semibold text-primary">Recent System Activity</h2>
+            <p className="text-xs text-muted-foreground">Administrative audit trail and security logs</p>
+          </div>
+          <Link to="/audit-log" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+            View Full Logs <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        <div className="overflow-x-auto rounded-md border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium">User</th>
+                <th className="px-4 py-3 text-left font-medium">Action</th>
+                <th className="px-4 py-3 text-left font-medium">Status</th>
+                <th className="px-4 py-3 text-left font-medium hidden sm:table-cell">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {(audit.data ?? []).map((row) => {
+                const name = row.actor_name ?? "System";
+                const initials = name.split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+                return (
+                  <tr key={row.id} className="hover:bg-muted/30">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">{initials || "SY"}</div>
+                        <div className="min-w-0">
+                          <div className="truncate font-medium">{name}</div>
+                          <div className="truncate text-[11px] text-muted-foreground">{row.entity}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 capitalize">{row.action.replace(/_/g, " ")}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">● success</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{new Date(row.created_at).toLocaleString()}</td>
+                  </tr>
+                );
+              })}
+              {(!audit.data || audit.data.length === 0) && (
+                <tr><td colSpan={4} className="px-4 py-10 text-center text-muted-foreground text-sm">No recent activity.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      {/* Role-specific extras kept for principals / exam officers */}
+      {(has("principal") || has("exam_officer")) && (
+        <Card className="mt-6 p-5">
+          <h2 className="font-display text-xl font-semibold text-primary">Results pipeline · {stats.currentTerm ?? "current term"}</h2>
+          <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+            <PipeStat label="Pending" value={stats.pendingResults} />
+            <PipeStat label="In approval" value={stats.approvalQueue} />
+            <PipeStat label="Published" value={stats.publishedResults} />
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function StatTile({
+  label, value, hint, icon: Icon, accent, progress,
+}: { label: string; value: string; hint?: string; icon: typeof Users; accent?: boolean; progress?: number }) {
+  return (
+    <Card className={`relative overflow-hidden p-5 ${accent ? "border-l-[3px] border-l-primary" : ""}`}>
+      <div className="flex items-start justify-between">
+        <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+        <div className="grid h-7 w-7 place-items-center rounded-md border bg-muted/40 text-primary"><Icon className="h-3.5 w-3.5" /></div>
+      </div>
+      <div className="mt-2 font-display text-3xl font-bold text-primary">{value}</div>
+      {progress != null ? (
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="h-1.5 flex-1 overflow-hidden rounded bg-muted"><div className="h-full bg-primary" style={{ width: `${progress}%` }} /></div>
+          <span>{hint}</span>
+        </div>
+      ) : hint ? (
+        <p className="mt-2 text-xs text-muted-foreground">{hint}</p>
+      ) : null}
+    </Card>
+  );
+}
+
+function BarRow({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
+  const pct = total ? Math.round((value / total) * 100) : 0;
+  return (
+    <div>
+      <div className="flex items-center justify-between text-sm">
+        <span className="flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${color}`} /> {label}</span>
+        <span className="text-muted-foreground"><span className="font-medium text-foreground">{value.toLocaleString()}</span> students</span>
+      </div>
+      <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-muted"><div className={`h-full ${color}`} style={{ width: `${pct}%` }} /></div>
+    </div>
+  );
+}
+
+function DistroVisual({ total, sect }: { total: number; sect: { NUR: number; PRI: number; SEC: number } }) {
+  const t = sect.NUR + sect.PRI + sect.SEC || 1;
+  const secPct = Math.round((sect.SEC / t) * 100);
+  const priPct = Math.round((sect.PRI / t) * 100);
+  const nurPct = 100 - secPct - priPct;
+  return (
+    <div className="relative mx-auto h-44 w-44 rounded-2xl border-2 border-primary p-2">
+      <div className="absolute inset-3 grid place-items-center rounded-xl bg-background">
+        <div className="text-center">
+          <div className="font-display text-2xl font-bold text-primary">{total.toLocaleString()}</div>
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Total</div>
         </div>
       </div>
-    </AppLayout>
+      <div className="absolute left-0 top-0 h-[60%] w-2 rounded-l bg-primary" />
+      <div className="absolute left-0 top-0 h-2 w-[55%] rounded-t bg-primary" />
+      <div className="absolute left-0 bottom-0 h-2 w-[40%] rounded-b bg-gold" />
+      <div className="absolute right-0 top-2 h-[35%] w-2 rounded-r bg-gold/70" />
+      <div className="sr-only">Sec {secPct}% Pri {priPct}% Nur {nurPct}%</div>
+    </div>
+  );
+}
+
+function QuickAction({ icon: Icon, title, subtitle, to }: { icon: typeof Users; title: string; subtitle: string; to: string }) {
+  return (
+    <Link to={to} className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3 transition hover:bg-muted/60">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <div className="text-sm font-semibold leading-tight">{title}</div>
+        <div className="text-xs text-muted-foreground">{subtitle}</div>
+      </div>
+    </Link>
+  );
+}
+
+function PipeStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-md border p-3">
+      <div className="font-display text-2xl font-bold text-primary">{value}</div>
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+    </div>
   );
 }

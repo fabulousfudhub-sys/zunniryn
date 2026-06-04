@@ -9,23 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ResultsPortalRouteImport } from './routes/results-portal'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRepsRouteImport } from './routes/_authenticated/reps'
-import { Route as AuthenticatedDealsRouteImport } from './routes/_authenticated/deals'
+import { Route as AuthenticatedSubjectsRouteImport } from './routes/_authenticated/subjects'
+import { Route as AuthenticatedStudentsRouteImport } from './routes/_authenticated/students'
+import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/staff'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedScratchCardsRouteImport } from './routes/_authenticated/scratch-cards'
+import { Route as AuthenticatedScoresRouteImport } from './routes/_authenticated/scores'
+import { Route as AuthenticatedResultsRouteImport } from './routes/_authenticated/results'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedGradingRouteImport } from './routes/_authenticated/grading'
+import { Route as AuthenticatedExportsRouteImport } from './routes/_authenticated/exports'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCompPlansRouteImport } from './routes/_authenticated/comp-plans'
-import { Route as AuthenticatedAiChatRouteImport } from './routes/_authenticated/ai-chat'
-import { Route as AuthenticatedRepsIndexRouteImport } from './routes/_authenticated/reps.index'
-import { Route as AuthenticatedRepsRepIdRouteImport } from './routes/_authenticated/reps.$repId'
+import { Route as AuthenticatedClassesRouteImport } from './routes/_authenticated/classes'
+import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
+import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated/attendance'
+import { Route as AuthenticatedAssignmentsRouteImport } from './routes/_authenticated/assignments'
+import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authenticated/announcements'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
+const ResultsPortalRoute = ResultsPortalRouteImport.update({
+  id: '/results-portal',
+  path: '/results-portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -34,132 +55,264 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRepsRoute = AuthenticatedRepsRouteImport.update({
-  id: '/reps',
-  path: '/reps',
-  getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedSubjectsRoute = AuthenticatedSubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDealsRoute = AuthenticatedDealsRouteImport.update({
-  id: '/deals',
-  path: '/deals',
-  getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedStudentsRoute = AuthenticatedStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStaffRoute = AuthenticatedStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedScratchCardsRoute =
+  AuthenticatedScratchCardsRouteImport.update({
+    id: '/scratch-cards',
+    path: '/scratch-cards',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedScoresRoute = AuthenticatedScoresRouteImport.update({
+  id: '/scores',
+  path: '/scores',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedResultsRoute = AuthenticatedResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGradingRoute = AuthenticatedGradingRouteImport.update({
+  id: '/grading',
+  path: '/grading',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedExportsRoute = AuthenticatedExportsRouteImport.update({
+  id: '/exports',
+  path: '/exports',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedCompPlansRoute = AuthenticatedCompPlansRouteImport.update({
-  id: '/comp-plans',
-  path: '/comp-plans',
-  getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedClassesRoute = AuthenticatedClassesRouteImport.update({
+  id: '/classes',
+  path: '/classes',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAiChatRoute = AuthenticatedAiChatRouteImport.update({
-  id: '/ai-chat',
-  path: '/ai-chat',
-  getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedAuditLogRoute = AuthenticatedAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedRepsIndexRoute = AuthenticatedRepsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedRepsRoute,
+const AuthenticatedAttendanceRoute = AuthenticatedAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedRepsRepIdRoute = AuthenticatedRepsRepIdRouteImport.update({
-  id: '/$repId',
-  path: '/$repId',
-  getParentRoute: () => AuthenticatedRepsRoute,
-} as any)
+const AuthenticatedAssignmentsRoute =
+  AuthenticatedAssignmentsRouteImport.update({
+    id: '/assignments',
+    path: '/assignments',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAnnouncementsRoute =
+  AuthenticatedAnnouncementsRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/ai-chat': typeof AuthenticatedAiChatRoute
-  '/comp-plans': typeof AuthenticatedCompPlansRoute
+  '/auth': typeof AuthRoute
+  '/results-portal': typeof ResultsPortalRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/announcements': typeof AuthenticatedAnnouncementsRoute
+  '/assignments': typeof AuthenticatedAssignmentsRoute
+  '/attendance': typeof AuthenticatedAttendanceRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
+  '/classes': typeof AuthenticatedClassesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/deals': typeof AuthenticatedDealsRoute
-  '/reps': typeof AuthenticatedRepsRouteWithChildren
-  '/reps/$repId': typeof AuthenticatedRepsRepIdRoute
-  '/reps/': typeof AuthenticatedRepsIndexRoute
+  '/exports': typeof AuthenticatedExportsRoute
+  '/grading': typeof AuthenticatedGradingRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/results': typeof AuthenticatedResultsRoute
+  '/scores': typeof AuthenticatedScoresRoute
+  '/scratch-cards': typeof AuthenticatedScratchCardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/staff': typeof AuthenticatedStaffRoute
+  '/students': typeof AuthenticatedStudentsRoute
+  '/subjects': typeof AuthenticatedSubjectsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/ai-chat': typeof AuthenticatedAiChatRoute
-  '/comp-plans': typeof AuthenticatedCompPlansRoute
+  '/auth': typeof AuthRoute
+  '/results-portal': typeof ResultsPortalRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/announcements': typeof AuthenticatedAnnouncementsRoute
+  '/assignments': typeof AuthenticatedAssignmentsRoute
+  '/attendance': typeof AuthenticatedAttendanceRoute
+  '/audit-log': typeof AuthenticatedAuditLogRoute
+  '/classes': typeof AuthenticatedClassesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/deals': typeof AuthenticatedDealsRoute
-  '/reps/$repId': typeof AuthenticatedRepsRepIdRoute
-  '/reps': typeof AuthenticatedRepsIndexRoute
+  '/exports': typeof AuthenticatedExportsRoute
+  '/grading': typeof AuthenticatedGradingRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/results': typeof AuthenticatedResultsRoute
+  '/scores': typeof AuthenticatedScoresRoute
+  '/scratch-cards': typeof AuthenticatedScratchCardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/staff': typeof AuthenticatedStaffRoute
+  '/students': typeof AuthenticatedStudentsRoute
+  '/subjects': typeof AuthenticatedSubjectsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/login': typeof LoginRoute
-  '/_authenticated/ai-chat': typeof AuthenticatedAiChatRoute
-  '/_authenticated/comp-plans': typeof AuthenticatedCompPlansRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/results-portal': typeof ResultsPortalRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRoute
+  '/_authenticated/assignments': typeof AuthenticatedAssignmentsRoute
+  '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
+  '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
+  '/_authenticated/classes': typeof AuthenticatedClassesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/deals': typeof AuthenticatedDealsRoute
-  '/_authenticated/reps': typeof AuthenticatedRepsRouteWithChildren
-  '/_authenticated/reps/$repId': typeof AuthenticatedRepsRepIdRoute
-  '/_authenticated/reps/': typeof AuthenticatedRepsIndexRoute
+  '/_authenticated/exports': typeof AuthenticatedExportsRoute
+  '/_authenticated/grading': typeof AuthenticatedGradingRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/results': typeof AuthenticatedResultsRoute
+  '/_authenticated/scores': typeof AuthenticatedScoresRoute
+  '/_authenticated/scratch-cards': typeof AuthenticatedScratchCardsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/staff': typeof AuthenticatedStaffRoute
+  '/_authenticated/students': typeof AuthenticatedStudentsRoute
+  '/_authenticated/subjects': typeof AuthenticatedSubjectsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/login'
-    | '/ai-chat'
-    | '/comp-plans'
+    | '/auth'
+    | '/results-portal'
+    | '/sitemap.xml'
+    | '/announcements'
+    | '/assignments'
+    | '/attendance'
+    | '/audit-log'
+    | '/classes'
     | '/dashboard'
-    | '/deals'
-    | '/reps'
-    | '/reps/$repId'
-    | '/reps/'
+    | '/exports'
+    | '/grading'
+    | '/reports'
+    | '/results'
+    | '/scores'
+    | '/scratch-cards'
+    | '/settings'
+    | '/staff'
+    | '/students'
+    | '/subjects'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/login'
-    | '/ai-chat'
-    | '/comp-plans'
+    | '/auth'
+    | '/results-portal'
+    | '/sitemap.xml'
+    | '/announcements'
+    | '/assignments'
+    | '/attendance'
+    | '/audit-log'
+    | '/classes'
     | '/dashboard'
-    | '/deals'
-    | '/reps/$repId'
-    | '/reps'
+    | '/exports'
+    | '/grading'
+    | '/reports'
+    | '/results'
+    | '/scores'
+    | '/scratch-cards'
+    | '/settings'
+    | '/staff'
+    | '/students'
+    | '/subjects'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/login'
-    | '/_authenticated/ai-chat'
-    | '/_authenticated/comp-plans'
+    | '/auth'
+    | '/results-portal'
+    | '/sitemap.xml'
+    | '/_authenticated/announcements'
+    | '/_authenticated/assignments'
+    | '/_authenticated/attendance'
+    | '/_authenticated/audit-log'
+    | '/_authenticated/classes'
     | '/_authenticated/dashboard'
-    | '/_authenticated/deals'
-    | '/_authenticated/reps'
-    | '/_authenticated/reps/$repId'
-    | '/_authenticated/reps/'
+    | '/_authenticated/exports'
+    | '/_authenticated/grading'
+    | '/_authenticated/reports'
+    | '/_authenticated/results'
+    | '/_authenticated/scores'
+    | '/_authenticated/scratch-cards'
+    | '/_authenticated/settings'
+    | '/_authenticated/staff'
+    | '/_authenticated/students'
+    | '/_authenticated/subjects'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  LoginRoute: typeof LoginRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ResultsPortalRoute: typeof ResultsPortalRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/results-portal': {
+      id: '/results-portal'
+      path: '/results-portal'
+      fullPath: '/results-portal'
+      preLoaderRoute: typeof ResultsPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -169,105 +322,169 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/reps': {
-      id: '/_authenticated/reps'
-      path: '/reps'
-      fullPath: '/reps'
-      preLoaderRoute: typeof AuthenticatedRepsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/subjects': {
+      id: '/_authenticated/subjects'
+      path: '/subjects'
+      fullPath: '/subjects'
+      preLoaderRoute: typeof AuthenticatedSubjectsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/deals': {
-      id: '/_authenticated/deals'
-      path: '/deals'
-      fullPath: '/deals'
-      preLoaderRoute: typeof AuthenticatedDealsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/students': {
+      id: '/_authenticated/students'
+      path: '/students'
+      fullPath: '/students'
+      preLoaderRoute: typeof AuthenticatedStudentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/staff': {
+      id: '/_authenticated/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof AuthenticatedStaffRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/scratch-cards': {
+      id: '/_authenticated/scratch-cards'
+      path: '/scratch-cards'
+      fullPath: '/scratch-cards'
+      preLoaderRoute: typeof AuthenticatedScratchCardsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/scores': {
+      id: '/_authenticated/scores'
+      path: '/scores'
+      fullPath: '/scores'
+      preLoaderRoute: typeof AuthenticatedScoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/results': {
+      id: '/_authenticated/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof AuthenticatedResultsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/grading': {
+      id: '/_authenticated/grading'
+      path: '/grading'
+      fullPath: '/grading'
+      preLoaderRoute: typeof AuthenticatedGradingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/exports': {
+      id: '/_authenticated/exports'
+      path: '/exports'
+      fullPath: '/exports'
+      preLoaderRoute: typeof AuthenticatedExportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/comp-plans': {
-      id: '/_authenticated/comp-plans'
-      path: '/comp-plans'
-      fullPath: '/comp-plans'
-      preLoaderRoute: typeof AuthenticatedCompPlansRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/classes': {
+      id: '/_authenticated/classes'
+      path: '/classes'
+      fullPath: '/classes'
+      preLoaderRoute: typeof AuthenticatedClassesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/ai-chat': {
-      id: '/_authenticated/ai-chat'
-      path: '/ai-chat'
-      fullPath: '/ai-chat'
-      preLoaderRoute: typeof AuthenticatedAiChatRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/audit-log': {
+      id: '/_authenticated/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AuthenticatedAuditLogRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/reps/': {
-      id: '/_authenticated/reps/'
-      path: '/'
-      fullPath: '/reps/'
-      preLoaderRoute: typeof AuthenticatedRepsIndexRouteImport
-      parentRoute: typeof AuthenticatedRepsRoute
+    '/_authenticated/attendance': {
+      id: '/_authenticated/attendance'
+      path: '/attendance'
+      fullPath: '/attendance'
+      preLoaderRoute: typeof AuthenticatedAttendanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/reps/$repId': {
-      id: '/_authenticated/reps/$repId'
-      path: '/$repId'
-      fullPath: '/reps/$repId'
-      preLoaderRoute: typeof AuthenticatedRepsRepIdRouteImport
-      parentRoute: typeof AuthenticatedRepsRoute
+    '/_authenticated/assignments': {
+      id: '/_authenticated/assignments'
+      path: '/assignments'
+      fullPath: '/assignments'
+      preLoaderRoute: typeof AuthenticatedAssignmentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/announcements': {
+      id: '/_authenticated/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AuthenticatedAnnouncementsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AuthenticatedRepsRouteChildren {
-  AuthenticatedRepsRepIdRoute: typeof AuthenticatedRepsRepIdRoute
-  AuthenticatedRepsIndexRoute: typeof AuthenticatedRepsIndexRoute
-}
-
-const AuthenticatedRepsRouteChildren: AuthenticatedRepsRouteChildren = {
-  AuthenticatedRepsRepIdRoute: AuthenticatedRepsRepIdRoute,
-  AuthenticatedRepsIndexRoute: AuthenticatedRepsIndexRoute,
-}
-
-const AuthenticatedRepsRouteWithChildren =
-  AuthenticatedRepsRoute._addFileChildren(AuthenticatedRepsRouteChildren)
-
-interface AuthenticatedRouteChildren {
-  AuthenticatedAiChatRoute: typeof AuthenticatedAiChatRoute
-  AuthenticatedCompPlansRoute: typeof AuthenticatedCompPlansRoute
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnnouncementsRoute: typeof AuthenticatedAnnouncementsRoute
+  AuthenticatedAssignmentsRoute: typeof AuthenticatedAssignmentsRoute
+  AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
+  AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
+  AuthenticatedClassesRoute: typeof AuthenticatedClassesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedDealsRoute: typeof AuthenticatedDealsRoute
-  AuthenticatedRepsRoute: typeof AuthenticatedRepsRouteWithChildren
+  AuthenticatedExportsRoute: typeof AuthenticatedExportsRoute
+  AuthenticatedGradingRoute: typeof AuthenticatedGradingRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedResultsRoute: typeof AuthenticatedResultsRoute
+  AuthenticatedScoresRoute: typeof AuthenticatedScoresRoute
+  AuthenticatedScratchCardsRoute: typeof AuthenticatedScratchCardsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
+  AuthenticatedStudentsRoute: typeof AuthenticatedStudentsRoute
+  AuthenticatedSubjectsRoute: typeof AuthenticatedSubjectsRoute
 }
 
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAiChatRoute: AuthenticatedAiChatRoute,
-  AuthenticatedCompPlansRoute: AuthenticatedCompPlansRoute,
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnnouncementsRoute: AuthenticatedAnnouncementsRoute,
+  AuthenticatedAssignmentsRoute: AuthenticatedAssignmentsRoute,
+  AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
+  AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
+  AuthenticatedClassesRoute: AuthenticatedClassesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedDealsRoute: AuthenticatedDealsRoute,
-  AuthenticatedRepsRoute: AuthenticatedRepsRouteWithChildren,
+  AuthenticatedExportsRoute: AuthenticatedExportsRoute,
+  AuthenticatedGradingRoute: AuthenticatedGradingRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedResultsRoute: AuthenticatedResultsRoute,
+  AuthenticatedScoresRoute: AuthenticatedScoresRoute,
+  AuthenticatedScratchCardsRoute: AuthenticatedScratchCardsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStaffRoute: AuthenticatedStaffRoute,
+  AuthenticatedStudentsRoute: AuthenticatedStudentsRoute,
+  AuthenticatedSubjectsRoute: AuthenticatedSubjectsRoute,
 }
 
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  LoginRoute: LoginRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ResultsPortalRoute: ResultsPortalRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
